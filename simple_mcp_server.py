@@ -24,6 +24,17 @@ def handle_request(request):
         return {
             "tools": [
                 {
+                    "name": "validate",
+                    "description": "Validate bearer token and return phone number",
+                    "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                            "token": {"type": "string"}
+                        },
+                        "required": ["token"]
+                    }
+                },
+                {
                     "name": "analyze_reddit_user",
                     "description": "Analyze Reddit user toxicity",
                     "inputSchema": {
@@ -53,7 +64,9 @@ def handle_request(request):
         tool_name = params.get("name")
         arguments = params.get("arguments", {})
         
-        if tool_name == "analyze_reddit_user":
+        if tool_name == "validate":
+            return validate_token(arguments)
+        elif tool_name == "analyze_reddit_user":
             return analyze_user(arguments)
         elif tool_name == "classify_text":
             return classify_text(arguments)
@@ -96,6 +109,17 @@ def analyze_user(args):
         
     except Exception as e:
         return {"error": str(e)}
+
+def validate_token(args):
+    """Validate bearer token - required by PuchAI"""
+    token = args.get("token")
+    
+    # Replace with your actual phone number
+    # Format: {country_code}{number} (e.g., 919876543210)
+    if token == "your_bearer_token_here":  # Replace with your actual token
+        return "918147378108"  # Replace with your phone number
+    else:
+        return {"error": "Invalid token"}
 
 def classify_text(args):
     """Classify single text"""
