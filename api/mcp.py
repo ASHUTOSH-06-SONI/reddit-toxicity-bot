@@ -3,10 +3,19 @@ import json
 import sys
 import os
 
-# Add parent directory to path for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+# Mock ML function for deployment
+def classify_dm(text):
+    """Mock toxicity classifier"""
+    # Simple keyword-based detection for demo
+    toxic_words = ['hate', 'stupid', 'idiot', 'kill', 'die', 'fuck']
+    text_lower = text.lower()
+    
+    for word in toxic_words:
+        if word in text_lower:
+            return "TOXIC", 0.8
+    
+    return "NON_TOXIC", 0.2
 
-from securedm.model import classify_dm
 import praw
 
 # Reddit configuration
@@ -105,9 +114,8 @@ def validate_token(args):
     """Validate bearer token - required by PuchAI"""
     token = args.get("token")
     
-    # Replace with your actual phone number
-    if token == "reddit_toxicity_2024":  # Your bearer token
-        return "918147378108"  # Your phone number
+    if token == "reddit_toxicity_2024":
+        return "918147378108"
     else:
         return {"error": "Invalid token"}
 
