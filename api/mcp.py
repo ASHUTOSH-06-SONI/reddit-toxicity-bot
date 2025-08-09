@@ -114,8 +114,9 @@ def validate_token(args):
     """Validate bearer token - required by PuchAI"""
     token = args.get("token")
     
-    if token == "reddit_toxicity_2024":
-        return "918147378108"
+    # Replace with your actual phone number
+    if token == "reddit_toxicity_2024":  # Your bearer token
+        return "918147378108"  # Your phone number
     else:
         return {"error": "Invalid token"}
 
