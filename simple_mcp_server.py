@@ -1,11 +1,10 @@
-from http.server import BaseHTTPRequestHandler
+#!/usr/bin/env python3
+"""
+Simple Reddit Toxicity Detection MCP Server
+"""
+
 import json
 import sys
-import os
-
-# Add parent directory to path for imports
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-
 from securedm.model import classify_dm
 import praw
 
@@ -16,33 +15,6 @@ REDDIT_CONFIG = {
     "user_agent": "ToxicityMCP/1.0"
 }
 
-class handler(BaseHTTPRequestHandler):
-    def do_POST(self):
-        content_length = int(self.headers['Content-Length'])
-        post_data = self.rfile.read(content_length)
-        
-        try:
-            request = json.loads(post_data.decode('utf-8'))
-            response = handle_request(request)
-            
-            self.send_response(200)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps(response).encode())
-            
-        except Exception as e:
-            self.send_response(500)
-            self.send_header('Content-type', 'application/json')
-            self.end_headers()
-            self.wfile.write(json.dumps({"error": str(e)}).encode())
-    
-    def do_GET(self):
-        self.send_response(200)
-        self.send_header('Content-type', 'application/json')
-        self.end_headers()
-        response = {"status": "Reddit Toxicity MCP Server", "tools": ["validate", "analyze_reddit_user", "classify_text"]}
-        self.wfile.write(json.dumps(response).encode())
-
 def handle_request(request):
     """Handle MCP requests"""
     method = request.get("method")
@@ -51,17 +23,6 @@ def handle_request(request):
     if method == "tools/list":
         return {
             "tools": [
-                {
-                    "name": "validate",
-                    "description": "Validate bearer token and return phone number",
-                    "inputSchema": {
-                        "type": "object",
-                        "properties": {
-                            "token": {"type": "string"}
-                        },
-                        "required": ["token"]
-                    }
-                },
                 {
                     "name": "analyze_reddit_user",
                     "description": "Analyze Reddit user toxicity",
@@ -92,24 +53,12 @@ def handle_request(request):
         tool_name = params.get("name")
         arguments = params.get("arguments", {})
         
-        if tool_name == "validate":
-            return validate_token(arguments)
-        elif tool_name == "analyze_reddit_user":
+        if tool_name == "analyze_reddit_user":
             return analyze_user(arguments)
         elif tool_name == "classify_text":
             return classify_text(arguments)
     
     return {"error": "Unknown method"}
-
-def validate_token(args):
-    """Validate bearer token - required by PuchAI"""
-    token = args.get("token")
-    
-    # Replace with your actual phone number
-    if token == "reddit_toxicity_2024":  # Your bearer token
-        return "918147378108"  # Your phone number
-    else:
-        return {"error": "Invalid token"}
 
 def analyze_user(args):
     """Analyze Reddit user"""
@@ -121,15 +70,20 @@ def analyze_user(args):
         user = reddit.redditor(username)
         
         texts = []
+        # Get recent comments
         for comment in user.comments.new(limit=max_posts):
             if comment.body and comment.body != "[deleted]":
                 texts.append(comment.body)
         
+        # Analyze toxicity
         toxic_count = 0
+        results = []
+        
         for text in texts:
             label, score = classify_dm(text)
             if label.upper() == "TOXIC":
                 toxic_count += 1
+            results.append({"text": text[:100], "label": label, "score": score})
         
         return {
             "content": [
@@ -159,3 +113,22 @@ def classify_text(args):
         }
     except Exception as e:
         return {"error": str(e)}
+
+def main():
+    """Main MCP server loop"""
+    print("Reddit Toxicity MCP Server started", file=sys.stderr)
+    
+    for line in sys.stdin:
+        try:
+            request = json.loads(line.strip())
+            response = handle_request(request)
+            print(json.dumps(response))
+            sys.stdout.flush()
+        except Exception as e:
+            error_response = {"error": str(e)}
+            print(json.dumps(error_response))
+            sys.stdout.flush()
+
+if __name__ == "__main__":
+    main()
+
