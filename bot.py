@@ -1,5 +1,6 @@
 import os
 import sys
+import subprocess
 from datetime import datetime
 import praw
 from praw.exceptions import RedditAPIException, PRAWException
@@ -8,9 +9,18 @@ import urllib.parse
 from flask import Flask
 import threading
 
-# Download NLTK data for deployment
+# Install NLTK if missing
 try:
     import nltk
+    print("✅ NLTK imported successfully")
+except ImportError:
+    print("⚠️ Installing NLTK...")
+    subprocess.check_call([sys.executable, "-m", "pip", "install", "nltk"])
+    import nltk
+    print("✅ NLTK installed and imported")
+
+# Download NLTK data
+try:
     nltk.download('punkt', quiet=True)
     nltk.download('stopwords', quiet=True)
     nltk.download('wordnet', quiet=True)
