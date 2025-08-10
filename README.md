@@ -3,7 +3,7 @@
 PS- I couldn't get this deployed at this point its just plain skill issue and i'm too dumb
 nevertheless I learned a little about my self that i've got to do a ton lot of work around building stuff
 hekk even the idea wasn't of my own.
-Will, learn about mcp and stuff and they try someday later but until then i gotta cover up for my stupidity.
+Will, learn about mcp and stuff and then try someday later but until then i gotta cover up for my stupidity.
 
 A comprehensive Reddit toxicity detection system with ML model, available as bot, web app, and MCP server.
 ## Features
